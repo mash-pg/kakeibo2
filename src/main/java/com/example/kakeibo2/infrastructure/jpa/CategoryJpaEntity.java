@@ -42,7 +42,7 @@ public class CategoryJpaEntity {
 	
 	//Domain Entity→JPA Entity
 	public static CategoryJpaEntity fromDomainEntity(Category category) {
-		Long id = category.getId().getValue();
+		Long id = (category.getId() != null) ? category.getId().getValue() : null;
 		String name = category.getCategoryName().getValue();
 		return new CategoryJpaEntity(name, id);
 	}
