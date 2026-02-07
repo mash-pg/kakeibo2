@@ -68,13 +68,13 @@ public class TransactionJpaEntity {
 	
 	//Domain→JPA Entity
 	public static TransactionJpaEntity fromDomainEntity(Transaction transaction) {
-		Long id = transaction.getId().getValue();
+		Long id = (transaction.getId() != null) ? transaction.getId().getValue() : null;
 		String type = transaction.getType().name();
 		Integer amount = transaction.getAmount().getValue();
 		Long categoryId = transaction.getCategoryId().getValue();
 		String description = transaction.getDescription();
 		LocalDate transactionDate = transaction.getTransactionDate();
-		LocalDateTime createdAt = transaction.getCreatedAt();
+		LocalDateTime createdAt = (transaction.getCreatedAt() != null) ? transaction.getCreatedAt() : LocalDateTime.now();
 		
 		return new TransactionJpaEntity(
 				id,
