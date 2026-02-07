@@ -22,13 +22,13 @@ import com.example.kakeibo2.presentation.dto.CategoryResponse;
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
-	private final CategoryUseCase UseCase;
-	public CategoryController(CategoryUseCase categoryUseCase) {
-		this.UseCase =  categoryUseCase;
+	private final CategoryUseCase useCase;
+	public CategoryController(CategoryUseCase useCase) {
+		this.useCase =  useCase;
 	}
 	@GetMapping
 	public ResponseEntity<List<CategoryResponse>> findAll(){
-		List<Category> entityList =  UseCase.findAll();
+		List<Category> entityList =  useCase.findAll();
 		//EntityのリストをResponseのリストに変換
 		List<CategoryResponse>  response = entityList.stream().map(CategoryResponse::fromEntity)
 		.collect(Collectors.toList());
@@ -41,14 +41,14 @@ public class CategoryController {
 	public ResponseEntity<CategoryResponse> create(
 			@RequestBody CategoryRequest request
 			){
-		Category category = UseCase.create(request.getName());
+		Category category = useCase.create(request.getName());
 		CategoryResponse response = CategoryResponse.fromEntity(category);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id){
-		UseCase.delete(id);
+		useCase.delete(id);
 		return ResponseEntity.noContent().build();
 	}
 	
