@@ -9,7 +9,7 @@ public enum TransactionType {
 		try {
 			return valueOf(value.toUpperCase());
 		}catch(IllegalArgumentException e) {
-			throw new InvalidTransactionTypeException("不正な取引種別です" + value);
+			throw new InvalidTransactionTypeException("不正な取引種別です : " + value);
 		}
 	}
 }
