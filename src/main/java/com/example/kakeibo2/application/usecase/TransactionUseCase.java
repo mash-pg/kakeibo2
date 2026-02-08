@@ -9,22 +9,32 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.kakeibo2.domain.entity.Transaction;
 import com.example.kakeibo2.domain.exception.CategoryNotFoundException;
 import com.example.kakeibo2.domain.exception.TransactionNotFoundException;
+import com.example.kakeibo2.domain.factory.TransactionFactory;
 import com.example.kakeibo2.domain.repository.CategoryRepository;
 import com.example.kakeibo2.domain.repository.TransactionRepository;
-import com.example.kakeibo2.domain.valueobject.Amount;
+import com.example.kakeibo2.domain.strategy.SummaryStrategy;
+import com.example.kakeibo2.domain.strategy.SummaryStrategyProvider;
 import com.example.kakeibo2.domain.valueobject.CategoryId;
 import com.example.kakeibo2.domain.valueobject.TransactionId;
-import com.example.kakeibo2.domain.valueobject.TransactionType;
 
 @Service
 public class TransactionUseCase {
+
+    private final TransactionFactory transactionFactory;
 	
 	private final TransactionRepository transactionRepository;
 	private final CategoryRepository categoryRepository; 
 	
-	public TransactionUseCase(TransactionRepository transactionRepository,CategoryRepository categoryRepository){
+	private final SummaryStrategyProvider provider;
+	public TransactionUseCase(
+			TransactionRepository transactionRepository,
+			CategoryRepository categoryRepository, 
+			TransactionFactory transactionFactory
+			,SummaryStrategyProvider provider){
 		this.transactionRepository = transactionRepository;
 		this.categoryRepository = categoryRepository;
+		this.transactionFactory = transactionFactory;
+		this.provider = provider;
 	}
 	
 	public List<Transaction> findAll(){
@@ -39,13 +49,16 @@ public class TransactionUseCase {
 			Long categoryId,
 			String description,
 			LocalDate transactionDate) {
-		TransactionType tranType = TransactionType.from(type);
-		TransactionId tranId = new TransactionId(id);
-		CategoryId catId = new CategoryId(categoryId);
-		Amount amt = new Amount(amount);
-		transactionRepository.findById(tranId).orElseThrow(()-> new TransactionNotFoundException("トランザクションが存在してません"));
+		transactionRepository.findById(new TransactionId(id)).orElseThrow(()-> new TransactionNotFoundException("トランザクションが存在してません"));
 		Transaction transaction = 
-				new Transaction(tranId, tranType, amt,catId, description, transactionDate, null);
+				transactionFactory.createForUpdate(
+						id,
+						type, 
+						amount, 
+						categoryId, 
+						description, 
+						transactionDate
+						);
 		return transactionRepository.save(transaction);
 	}
 	
@@ -57,11 +70,15 @@ public class TransactionUseCase {
 			String description,
 			LocalDate transactionDate
 			) {
-		TransactionType tranType = TransactionType.from(type);
-		CategoryId catId = new CategoryId(categoryId);
-		Amount amt = new Amount(amount);
-		categoryRepository.findById(catId).orElseThrow(()-> new CategoryNotFoundException("カテゴリが存在してません"));
-		Transaction transaction = new Transaction(null, tranType, amt, catId, description, transactionDate, null);
+		categoryRepository.findById(new CategoryId(categoryId)).orElseThrow(()-> new CategoryNotFoundException("カテゴリが存在してません"));
+		Transaction transaction = 
+				transactionFactory.createNew(
+						type, 
+						amount, 
+						categoryId, 
+						description, 
+						transactionDate
+						);
 		return transactionRepository.save(transaction);
 	}
 	
@@ -70,5 +87,11 @@ public class TransactionUseCase {
 		TransactionId tranId = new TransactionId(id);
 		transactionRepository.findById(tranId).orElseThrow(()-> new TransactionNotFoundException("トランザクションが存在してません"));
 		transactionRepository.deleteById(tranId);
+	}
+	
+	public int summarize(String summaryType) {
+		List<Transaction> transaction = transactionRepository.findAll();
+		SummaryStrategy strategy = provider.getStrategy(summaryType);
+		return strategy.summarize(transaction);
 	}
 }
