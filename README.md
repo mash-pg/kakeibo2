@@ -1,4 +1,4 @@
-# Kakeibo2 - 家計簿 API
+﻿# Kakeibo2 - 家計簿 API
 
 ## 概要
 
@@ -15,9 +15,7 @@ Spring Boot で作成した家計簿管理用の REST API です。
 
 ## 起動方法
 
-```bash
-./mvnw spring-boot:run
-```
+
 
 ## API ドキュメント
 
@@ -28,7 +26,7 @@ http://localhost:8080/swagger-ui.html
 ## エンドポイント
 
 | メソッド | パス | 説明 |
-|----------|------------------------------|------------------|
+|---------|------|------|
 | GET | /api/transactions | 取引一覧取得 |
 | POST | /api/transactions | 取引作成 |
 | PUT | /api/transactions/{id} | 取引更新 |
@@ -36,3 +34,13 @@ http://localhost:8080/swagger-ui.html
 | GET | /api/transactions/summary | 集計 |
 | GET | /api/categories | カテゴリ一覧取得 |
 | POST | /api/categories | カテゴリ作成 |
+
+## 学習内容
+
+このプロジェクトで学んだこと：
+
+- レイヤードアーキテクチャ（Presentation / Application / Domain / Infrastructure）
+- DDD 軽量版（Entity, Value Object, Repository）
+- デザインパターン（Factory, Strategy）
+- テスト（JUnit, Mockito, MockMvc）
+- Git フロー（feature ブランチ, PR, レビュー）
